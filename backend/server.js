@@ -29,23 +29,26 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS — allow origins from env or fallback list
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
-  .split(',')
-  .map((u) => u.trim())
-  .filter(Boolean);
+// ---------------------- CORS SETUP ----------------------
+const allowedOrigins = [
+  'http://localhost:5173', 
+  ...(process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map((u) => u.trim())
+    : []),
+].filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow requests with no origin (like mobile apps, curl)
+      // allow requests with no origin (like mobile apps or curl)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.length === 0) return callback(null, true); // allow all if not configured
       if (allowedOrigins.includes(origin)) return callback(null, true);
+      console.warn(`❌ CORS blocked request from: ${origin}`);
       return callback(new Error('CORS policy: origin not allowed'));
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   })
 );
 
@@ -54,12 +57,8 @@ app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // ----------------- Conditional MongoDB Connection -----------------
-// To disable DB (run email-only), set DISABLE_DB=true in your environment (.env)
-// By default DB is enabled.
 const disableDb = process.env.DISABLE_DB === 'true';
-
 let mongoConnected = false;
-
 const MONGO_URI = process.env.MONGO_URI;
 
 if (disableDb) {
@@ -95,6 +94,7 @@ app.get('/', (req, res) => {
     service: 'Autism ABA Clinic API',
     env: process.env.NODE_ENV || 'development',
     db: disableDb ? 'disabled' : 'enabled',
+    allowedOrigins,
   });
 });
 
@@ -114,6 +114,7 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  console.log('🌐 Allowed Origins:', allowedOrigins);
 });
 
 // Graceful shutdown
@@ -127,9 +128,7 @@ const shutdown = async () => {
         console.log('Mongo connection closed.');
         process.exit(0);
       });
-      // safety: in case mongoose close hangs, force exit below will run
     } else {
-      // No DB to close or not connected
       process.exit(0);
     }
   });
