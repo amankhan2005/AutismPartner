@@ -2,7 +2,7 @@
 // Autism ABA Partners - contact controller (clean admin + premium user emails)
 
 import nodemailer from "nodemailer";
-import ContactLead from "../models/contact.models.js";
+import ContactLead from "../models/contact.models.js"; // kept for other controllers (list/delete/getById)
 
 // Utility functions
 function missingFields(body, fields) {
@@ -58,28 +58,31 @@ export const createInquiry = async (req, res) => {
     });
 
   try {
-    // Save to DB
-    const doc = new ContactLead({
-      parentName: parentName.trim(),
+    // ----------------- NOTE -----------------
+    // MongoDB save removed here intentionally.
+    // We build a `saved` object in-memory (not persisted) and use it below for emails & response.
+    // ----------------------------------------
+
+    const saved = {
+      parentName: parentName?.trim() || "",
       email: String(email).trim().toLowerCase(),
       phone: String(phone).trim(),
-      childName: childName?.trim(),
+      childName: childName?.trim() || "",
       childAge:
         childAge !== undefined && childAge !== "" ? Number(childAge) : undefined,
-      city: city?.trim(),
-      state: state?.trim(),
-      zipCode: zipCode?.trim(),
+      city: city?.trim() || "",
+      state: state?.trim() || "",
+      zipCode: zipCode?.trim() || "",
       message: String(message).trim(),
-      serviceInterest,
-      preferredContact,
-      bestTimeToReach,
-      leadSource,
+      serviceInterest: serviceInterest || "",
+      preferredContact: preferredContact || "",
+      bestTimeToReach: bestTimeToReach || "",
+      leadSource: leadSource || "",
       utm: typeof utm === "object" ? utm : undefined,
       ipAddress: req.ip || req.headers["x-forwarded-for"] || "",
       userAgent: req.get("User-Agent") || "",
-    });
-
-    const saved = await doc.save();
+      createdAt: new Date(),
+    };
 
     // ---------------- EMAIL SETUP ----------------
     const transporter = createTransporter();
@@ -240,7 +243,7 @@ info@autismabapartners.com
 
     return res.status(201).json({
       ok: true,
-      message: "Inquiry created successfully",
+      message: "Inquiry processed successfully (not saved to DB)",
       contact: saved,
     });
   } catch (error) {

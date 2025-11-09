@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "Ninebyt backend server built with Express and MongoDB",
+  "description": "Autism Partner backend server built with Express and MongoDB",
   "main": "server.js",
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
     "start": "node server.js"
   },
   "keywords": [],
-  "author": "Aman Khan",
+  "author": "Autism Partner",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.2",

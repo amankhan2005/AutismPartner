@@ -53,30 +53,49 @@ app.use(
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// ----------------- MongoDB Connection -----------------
-const MONGO_URI = process.env.MONGO_URI;
-if (!MONGO_URI) {
-  console.error('❌ MONGO_URI is not set in environment variables.');
-  process.exit(1);
-}
+// ----------------- Conditional MongoDB Connection -----------------
+// To disable DB (run email-only), set DISABLE_DB=true in your environment (.env)
+// By default DB is enabled.
+const disableDb = process.env.DISABLE_DB === 'true';
 
-mongoose
-  .connect(MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch((err) => {
-    console.error('❌ MongoDB connection error:', err);
+let mongoConnected = false;
+
+const MONGO_URI = process.env.MONGO_URI;
+
+if (disableDb) {
+  console.log('⚠️  MongoDB connection disabled via DISABLE_DB=true');
+} else {
+  if (!MONGO_URI) {
+    console.error('❌ MONGO_URI is not set in environment variables.');
     process.exit(1);
-  });
+  }
+
+  mongoose
+    .connect(MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
+    .then(() => {
+      mongoConnected = true;
+      console.log('✅ MongoDB connected');
+    })
+    .catch((err) => {
+      console.error('❌ MongoDB connection error:', err);
+      process.exit(1);
+    });
+}
 
 // ----------------- Routes -----------------
 app.use('/api/contact', contactRoutes);
 
 // Basic health-check
 app.get('/', (req, res) => {
-  res.json({ ok: true, service: 'Autism ABA Clinic API', env: process.env.NODE_ENV || 'development' });
+  res.json({
+    ok: true,
+    service: 'Autism ABA Clinic API',
+    env: process.env.NODE_ENV || 'development',
+    db: disableDb ? 'disabled' : 'enabled',
+  });
 });
 
 // 404 handler
@@ -100,12 +119,19 @@ const server = app.listen(PORT, () => {
 // Graceful shutdown
 const shutdown = async () => {
   console.log('Shutdown initiated...');
-  server.close(() => {
+  server.close(async () => {
     console.log('HTTP server closed.');
-    mongoose.connection.close(false, () => {
-      console.log('Mongo connection closed.');
+
+    if (!disableDb && mongoConnected && mongoose.connection && mongoose.connection.readyState === 1) {
+      mongoose.connection.close(false, () => {
+        console.log('Mongo connection closed.');
+        process.exit(0);
+      });
+      // safety: in case mongoose close hangs, force exit below will run
+    } else {
+      // No DB to close or not connected
       process.exit(0);
-    });
+    }
   });
 
   // force exit after 10s
