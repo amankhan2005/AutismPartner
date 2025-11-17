@@ -1,5 +1,5 @@
  import React, { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 import AdminSidebar from "./components/AdminSidebar";
 import AdminHeader from "./components/AdminHeader";
@@ -34,17 +34,15 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
-      <MainApp
-        creds={creds}
-        setCreds={setCreds}
-        isExpanded={isExpanded}
-        setIsExpanded={setIsExpanded}
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        handleLogout={handleLogout}
-      />
-    </BrowserRouter>
+    <MainApp
+      creds={creds}
+      setCreds={setCreds}
+      isExpanded={isExpanded}
+      setIsExpanded={setIsExpanded}
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+      handleLogout={handleLogout}
+    />
   );
 }
 
@@ -64,7 +62,6 @@ function MainApp({
 
   return (
     <>
-      {/* Sidebar only when NOT on login page */}
       {!isLoginPage && creds && (
         <AdminSidebar
           isExpanded={isExpanded}
@@ -74,17 +71,12 @@ function MainApp({
         />
       )}
 
-      {/* Header only when NOT on login page */}
       {!isLoginPage && creds && (
         <AdminHeader isExpanded={isExpanded} onLogout={handleLogout} />
       )}
 
-      {/* Footer only when NOT on login page */}
-      {!isLoginPage && creds && (
-        <AdminFooter isExpanded={isExpanded} />
-      )}
+      {!isLoginPage && creds && <AdminFooter isExpanded={isExpanded} />}
 
-      {/* MAIN CONTENT */}
       <div
         className={`
           min-h-screen bg-slate-50 px-6
@@ -94,8 +86,6 @@ function MainApp({
         `}
       >
         <Routes>
-
-          {/* LOGIN PAGE — only page with no sidebar/header/footer */}
           <Route
             path="/admin/login"
             element={
@@ -108,7 +98,6 @@ function MainApp({
             }
           />
 
-          {/* PROTECTED ROUTES */}
           <Route
             path="/admin"
             element={
@@ -154,7 +143,6 @@ function MainApp({
             }
           />
 
-          {/* DEFAULT FALLBACK */}
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
       </div>
