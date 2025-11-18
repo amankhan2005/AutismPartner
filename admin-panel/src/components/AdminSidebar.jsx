@@ -1,149 +1,191 @@
- // src/components/AdminSidebar.jsx
-import React from "react";
+ import React, { useEffect, useRef, useCallback, useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import {
   FaHome,
   FaCog,
-  FaSlidersH,
   FaEnvelope,
   FaBriefcase,
-  FaTimes,
   FaBars,
+  FaTimes,
 } from "react-icons/fa";
+import Logo from "../assets/autism-logo.webp";
 
-import Logo from "../assets/autism-logo.webp"; // put your white-logo file here
+const SIDEBAR_WIDTH = {
+  mobile: "w-64",
+  tablet: "md:w-72",
+  collapsed: "lg:w-20",
+  expanded: "lg:w-64",
+};
 
 export default function AdminSidebar({
-  isExpanded,
-  setIsExpanded,
   isOpen,
   setIsOpen,
+  isExpanded,
+  setIsExpanded,
 }) {
-  const links = [
-    { name: "Dashboard", path: "/admin", icon: <FaHome /> },
-    { name: "Global Settings", path: "/admin/settings", icon: <FaCog /> },
-    // { name: "Slider", path: "/admin/slider", icon: <FaSlidersH /> },
-    { name: "Contacts", path: "/admin/contacts", icon: <FaEnvelope /> },
-    { name: "Careers", path: "/admin/careers", icon: <FaBriefcase /> },
-  ];
+  const sidebarRef = useRef(null);
+  const firstNavLinkRef = useRef(null);
+
+  const links = useMemo(
+    () => [
+      { name: "Dashboard", path: "/admin", icon: <FaHome /> },
+      { name: "Global Settings", path: "/admin/settings", icon: <FaCog /> },
+      { name: "Contacts", path: "/admin/contacts", icon: <FaEnvelope /> },
+      { name: "Careers", path: "/admin/careers", icon: <FaBriefcase /> },
+    ],
+    []
+  );
+
+  // ESC close
+  const handleEscape = useCallback(
+    (e) => {
+      if (e.key === "Escape") setIsOpen(false);
+    },
+    [setIsOpen]
+  );
+
+  // Outside click (mobile only)
+  const handleClickOutside = useCallback(
+    (e) => {
+      if (
+        isOpen &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(e.target) &&
+        window.innerWidth < 1024
+      ) {
+        setIsOpen(false);
+      }
+    },
+    [isOpen, setIsOpen]
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleEscape);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [handleEscape, handleClickOutside]);
+
+  // Focus first link on open
+  useEffect(() => {
+    if (isOpen && firstNavLinkRef.current) {
+      firstNavLinkRef.current.focus();
+    }
+  }, [isOpen]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Tab") return;
+
+    const navLinks = Array.from(
+      sidebarRef.current?.querySelectorAll("nav a") || []
+    );
+    const currentIndex = navLinks.indexOf(document.activeElement);
+
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const nextIndex =
+        e.key === "ArrowDown"
+          ? (currentIndex + 1) % navLinks.length
+          : (currentIndex - 1 + navLinks.length) % navLinks.length;
+
+      navLinks[nextIndex]?.focus();
+    }
+  };
 
   return (
     <>
-      {/* Mobile Toggle Button - Enhanced for better touch */}
+      {/* Mobile trigger button */}
       <button
-        aria-label="Open menu"
-        className="lg:hidden fixed top-3 sm:top-4 left-3 sm:left-4 z-[60] p-3 sm:p-3.5 rounded-2xl bg-gradient-to-br from-green-800 to-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-green-600"
+        className="lg:hidden fixed top-4 left-4 z-[100] p-3 rounded-full bg-orange-500 text-white shadow-lg hover:scale-110 active:scale-95 transition"
         onClick={() => setIsOpen(true)}
+        aria-label="Open sidebar"
       >
-        <FaBars className="text-lg sm:text-xl" />
+        <FaBars className="w-5 h-5" />
       </button>
 
-      {/* Mobile Overlay - Faster and more responsive */}
+      {/* Mobile backdrop */}
       {isOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[45] transition-opacity duration-200"
+          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] animate-fadeIn"
           onClick={() => setIsOpen(false)}
-          aria-hidden
         />
       )}
 
-      {/* SIDEBAR - Optimized for mobile */}
+      {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50
+        ref={sidebarRef}
+        className={`
+          fixed inset-y-0 left-0 z-[100]
           bg-gradient-to-b from-green-800 via-green-900 to-green-800
-          text-white shadow-2xl
-          transform transition-transform duration-300 ease-out
-          border-r-2 border-green-700/30
-          ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-          ${isExpanded ? "w-64" : "w-20"}
-          ${isOpen ? "w-72 sm:w-80" : ""} // Wider on mobile for better touch
+          text-white shadow-xl border-r border-green-700/40
+          transform transition-all duration-300
+          flex flex-col overflow-hidden
+
+          ${isOpen ? `${SIDEBAR_WIDTH.mobile} md:${SIDEBAR_WIDTH.tablet}` : "-translate-x-full lg:translate-x-0"}
+          ${isExpanded ? SIDEBAR_WIDTH.expanded : SIDEBAR_WIDTH.collapsed}
         `}
-        onMouseEnter={() => !isOpen && setIsExpanded(true)}
-        onMouseLeave={() => !isOpen && setIsExpanded(false)}
-        role="navigation"
-        aria-label="Admin sidebar"
+        onMouseEnter={() => window.innerWidth >= 1024 && setIsExpanded(true)}
+        onMouseLeave={() => window.innerWidth >= 1024 && setIsExpanded(false)}
+        onKeyDown={handleKeyDown}
       >
-        {/* Decorative background elements - Optimized */}
-        <div className="absolute inset-0 overflow-hidden opacity-5 pointer-events-none">
-          <div className="absolute -top-24 -left-24 w-48 h-48 bg-orange-400 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 -right-24 w-64 h-64 bg-green-400 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-24 left-1/2 w-48 h-48 bg-amber-400 rounded-full blur-3xl"></div>
-        </div>
-
-        {/* Header / Logo - Mobile optimized */}
-        <div className={`relative z-10 flex items-center ${isExpanded || isOpen ? "justify-between" : "justify-center"} p-4 sm:p-5 border-b border-green-700/30 bg-gradient-to-r from-green-800/30 to-green-700/30 backdrop-blur-sm`}>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-400 to-amber-500 rounded-2xl blur-md opacity-50 group-hover:opacity-75 transition-opacity duration-200"></div>
-              <div className="relative bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl p-2 sm:p-2.5 shadow-lg w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center overflow-hidden border-2 border-orange-300 group-hover:scale-105 transition-transform duration-200">
-                <img src={Logo} alt="Autism ABA Logo" className="w-6 h-6 sm:w-8 sm:h-8 object-contain filter brightness-0 invert" />
-              </div>
+        {/* Header */}
+        <div
+          className={`flex items-center justify-between p-4 border-b border-green-700/40 ${
+            isExpanded ? "" : "lg:justify-center"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-white rounded-xl border border-black/10 shadow-sm">
+              <img
+                src={Logo}
+                alt="Autism ABA Logo"
+                className="h-9 w-9 lg:h-9 lg:w-9 object-contain"
+              />
             </div>
-
-            {(isExpanded || isOpen) && (
-              <div className="animate-fadeInRight">
-                <h2 className="font-black text-base sm:text-lg text-white tracking-tight bg-gradient-to-r from-white to-orange-100 bg-clip-text">Autism ABA</h2>
-                <p className="text-[10px] sm:text-xs text-green-200 font-semibold">Admin Portal</p>
-              </div>
+            {isExpanded && (
+              <span className="text-lg font-semibold text-white tracking-wide">
+                Admin Panel
+              </span>
             )}
           </div>
 
-          {/* Mobile close button - Better touch target */}
+          {/* Close button (mobile) */}
           <button
-            className="lg:hidden text-white bg-white/10 hover:bg-white/20 p-2 sm:p-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/20"
+            className="lg:hidden p-2 bg-white/10 rounded-lg hover:bg-white/20 transition"
             onClick={() => setIsOpen(false)}
-            aria-label="Close menu"
+            aria-label="Close sidebar"
           >
-            <FaTimes className="text-lg sm:text-xl" />
+            <FaTimes />
           </button>
         </div>
 
-        {/* NAV - Mobile optimized spacing */}
-        <nav className="relative z-10 mt-4 sm:mt-6 px-2 sm:px-3">
-          <ul className="space-y-1 sm:space-y-2">
-            {links.map((link, index) => (
-              <li key={link.path} className="animate-fadeInUp" style={{animationDelay: `${index * 30}ms`}}>
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-4 overflow-y-auto">
+          <ul className="space-y-2">
+            {links.map((link, i) => (
+              <li key={link.path}>
                 <NavLink
                   to={link.path}
-                  end={link.path === "/admin"}
+                  ref={i === 0 ? firstNavLinkRef : null}
                   onClick={() => setIsOpen(false)}
                   className={({ isActive }) =>
-                    `group relative flex items-center px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl transition-all duration-200 overflow-hidden
-                      ${isActive 
-                        ? "bg-gradient-to-r from-orange-500 to-amber-500 text-green-900 shadow-lg" 
-                        : "text-white hover:bg-orange-500/20 hover:translate-x-1 active:scale-98"}
-                      ${isExpanded || isOpen ? "justify-start" : "justify-center"}`
+                    `
+                    flex items-center w-full transition-all px-4 py-3 rounded-xl
+                    ${
+                      isActive
+                        ? "bg-orange-500 shadow text-white"
+                        : "hover:bg-green-700/70 active:bg-green-600/70"
+                    }
+                    ${isExpanded ? "justify-start gap-3" : "lg:justify-center"}
+                    `
                   }
                 >
-                  {({ isActive }) => (
-                    <>
-                      {/* Active indicator */}
-                      {isActive && (
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-orange-600 to-amber-600 rounded-r-full"></div>
-                      )}
-                      
-                      {/* Icon container - Better mobile sizing */}
-                      <div className={`relative flex-shrink-0 ${isActive ? 'text-green-900' : 'text-white group-hover:text-orange-200'} transition-colors duration-200`}>
-                        <div className={`text-lg sm:text-xl ${isActive ? 'scale-110' : 'group-hover:scale-110'} transition-transform duration-200`}>
-                          {link.icon}
-                        </div>
-                        {!isActive && !isExpanded && !isOpen && (
-                          <div className="absolute inset-0 bg-orange-500/0 group-hover:bg-orange-500/10 rounded-lg blur-sm transition-all duration-200"></div>
-                        )}
-                      </div>
-
-                      {/* Text label - Mobile optimized */}
-                      {(isExpanded || isOpen) && (
-                        <span className={`ml-3 sm:ml-4 font-semibold text-sm sm:text-base ${isActive ? 'text-green-900' : 'text-white'} transition-colors duration-200`}>
-                          {link.name}
-                        </span>
-                      )}
-
-                      {/* Hover effect background - Faster animation */}
-                      {!isActive && (
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-500/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
-                      )}
-                    </>
+                  <span className="text-xl">{link.icon}</span>
+                  {isExpanded && (
+                    <span className="text-sm font-medium">{link.name}</span>
                   )}
                 </NavLink>
               </li>
@@ -151,43 +193,14 @@ export default function AdminSidebar({
           </ul>
         </nav>
 
-        {/* Bottom decoration - Mobile optimized */}
-        <div className={`absolute bottom-0 left-0 right-0 p-3 sm:p-4 border-t border-green-700/30 bg-gradient-to-r from-green-800/30 to-green-700/30 backdrop-blur-sm ${isExpanded || isOpen ? '' : 'hidden'}`}>
-          <div className="text-center">
-            <p className="text-[10px] sm:text-xs text-green-300 font-semibold">Version 1.0</p>
-            <p className="text-[8px] sm:text-[10px] text-green-400/70 mt-1">© 2025 Autism ABA</p>
+        {/* Footer */}
+        {isExpanded && (
+          <div className="p-4 border-t border-green-700/40 bg-green-900/30 text-xs text-green-200">
+            <p>© {new Date().getFullYear()} Autism ABA</p>
+            <p className="mt-1 text-green-300">Version 1.0.0</p>
           </div>
-        </div>
+        )}
       </aside>
-
-      {/* ANIMATIONS - Optimized for performance */}
-      <style>
-        {`
-          @keyframes fadeInRight {
-            from { opacity: 0; transform: translateX(-8px); }
-            to { opacity: 1; transform: translateX(0); }
-          }
-          .animate-fadeInRight {
-            animation: fadeInRight 0.2s ease-out;
-          }
-
-          @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          .animate-fadeInUp {
-            animation: fadeInUp 0.3s ease-out forwards;
-            opacity: 0;
-          }
-
-          /* Mobile optimizations */
-          @media (max-width: 640px) {
-            aside {
-              -webkit-overflow-scrolling: touch;
-            }
-          }
-        `}
-      </style>
     </>
   );
 }
