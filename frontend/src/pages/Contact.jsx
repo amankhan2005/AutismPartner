@@ -224,7 +224,7 @@ export default function ContactForm({ apiEndpoint = "/api/contact/save" }) {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">Call Us</h3>
-                  <p className="text-gray-600 text-sm">Available Mon-Fri, 8am-6pm</p>
+                  <p className="text-gray-600 text-sm">Available Mon-Sun, 8am-8pm</p>
                   <p className="text-orange-600 font-semibold mt-2">
                     <a
                       href={`tel:${CLINIC_PHONE.replace(/[^\d+]/g, "")}`}

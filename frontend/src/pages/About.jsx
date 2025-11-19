@@ -11,6 +11,7 @@ import {
   FaEnvelope,
   FaStar,
   FaAward,
+  FaSeedling,
   FaArrowRight,
   FaCheckCircle,
 } from "react-icons/fa";
@@ -207,21 +208,24 @@ useEffect(() => {
             </div>
 
             {/* Growth Card - Enhanced */}
-            <div className="group relative bg-white rounded-3xl p-10 border border-gray-200 hover:border-orange-300 transition-all duration-500 hover:shadow-2xl overflow-hidden transform hover:-translate-y-2 animate-fade-in-up animation-delay-600">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-50/0 to-orange-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center mb-6 transform group-hover:scale-110 transition-transform duration-500 shadow-lg group-hover:shadow-orange-200/50">
-                  <FaBrain className="text-white text-2xl" />
-                </div>
-                <h3 className="font-bold text-2xl mb-4 text-gray-900 group-hover:text-orange-600 transition-colors">
-                  Growth
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  We believe in continuous progress — celebrating every
-                  milestone, big or small, along the way.
-                </p>
-              </div>
-            </div>
+         <div className="group relative bg-white rounded-3xl p-10 border border-gray-200 hover:border-orange-300 transition-all duration-500 hover:shadow-2xl overflow-hidden transform hover:-translate-y-2 animate-fade-in-up animation-delay-600">
+  <div className="absolute inset-0 bg-gradient-to-br from-orange-50/0 to-orange-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+  <div className="relative z-10">
+    <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center mb-6 transform group-hover:scale-110 transition-transform duration-500 shadow-lg group-hover:shadow-orange-200/50">
+      <FaSeedling className="text-white text-2xl" />
+    </div>
+
+    <h3 className="font-bold text-2xl mb-4 text-gray-900 group-hover:text-orange-600 transition-colors">
+      Growth
+    </h3>
+
+    <p className="text-gray-600 leading-relaxed">
+      We believe in continuous progress — celebrating every milestone, big or small, along the way.
+    </p>
+  </div>
+</div>
+
           </div>
         </div>
       </section>
