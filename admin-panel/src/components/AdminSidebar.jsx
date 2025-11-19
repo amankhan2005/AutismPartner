@@ -7,6 +7,8 @@ import {
   FaBriefcase,
   FaBars,
   FaTimes,
+  FaMapMarkerAlt,
+  FaImages,
 } from "react-icons/fa";
 import Logo from "../assets/autism-logo.webp";
 
@@ -32,6 +34,10 @@ export default function AdminSidebar({
       { name: "Global Settings", path: "/admin/settings", icon: <FaCog /> },
       { name: "Contacts", path: "/admin/contacts", icon: <FaEnvelope /> },
       { name: "Careers", path: "/admin/careers", icon: <FaBriefcase /> },
+
+      // ⭐ MAP SETTINGS ADDED HERE
+      { name: "Map Settings", path: "/admin/map-settings", icon: <FaMapMarkerAlt /> },
+      { name: "Hero Images", path: "/admin/hero-images", icon: <FaImages /> },
     ],
     []
   );

@@ -1,6 +1,6 @@
  import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUserCircle, FaBars, FaSignOutAlt, FaBell, FaSearch } from "react-icons/fa";
+import { FaUserCircle, FaBars, FaSignOutAlt, FaSearch } from "react-icons/fa";
 
 // Constants for better maintainability
 const ANIMATION_DURATION = 300;
@@ -12,23 +12,18 @@ export default function AdminHeader({ isOpen, isExpanded, setIsOpen, onLogout, u
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [dontAsk, setDontAsk] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   
   // Refs for DOM manipulation
   const menuRef = useRef(null);
   const modalRef = useRef(null);
-  const notificationRef = useRef(null);
   const searchRef = useRef(null);
 
-  // Close dropdowns when clicking outside
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setShowMenu(false);
-      }
-      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
-        setShowNotifications(false);
       }
     };
 
@@ -42,7 +37,6 @@ export default function AdminHeader({ isOpen, isExpanded, setIsOpen, onLogout, u
       if (event.key === "Escape") {
         setShowModal(false);
         setShowMenu(false);
-        setShowNotifications(false);
       }
     };
 
@@ -84,13 +78,6 @@ export default function AdminHeader({ isOpen, isExpanded, setIsOpen, onLogout, u
     }
   }, [searchQuery, navigate]);
 
-  // Sample notifications (in a real app, these would come from props or API)
-  const notifications = [
-    { id: 1, message: "New contact form submission", read: false },
-    { id: 2, message: "System update available", read: false },
-    { id: 3, message: "Weekly report is ready", read: true }
-  ];
-
   return (
     <header
       className={`
@@ -117,61 +104,8 @@ export default function AdminHeader({ isOpen, isExpanded, setIsOpen, onLogout, u
         </h1>
        </div>
 
-      {/* Search bar */}
-      <form onSubmit={handleSearch} className="hidden md:flex items-center bg-white/20 rounded-xl px-3 py-2 border border-white/30 backdrop-blur-md">
-        <input
-          ref={searchRef}
-          type="text"
-          placeholder="Search..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="bg-transparent text-white placeholder-orange-100 outline-none w-48 lg:w-64"
-        />
-        <button type="submit" className="ml-2 text-white hover:text-orange-200 transition-colors" aria-label="Search">
-          <FaSearch />
-        </button>
-      </form>
-
       {/* RIGHT SIDE ACTIONS */}
       <div className="flex items-center gap-4">
-        {/* Notifications */}
-        <div className="relative" ref={notificationRef}>
-          <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2 rounded-full hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
-            aria-label="Notifications"
-            aria-expanded={showNotifications}
-          >
-            <FaBell className="text-xl" />
-            {notifications.filter(n => !n.read).length > 0 && (
-              <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
-            )}
-          </button>
-
-          {/* Notifications dropdown */}
-          {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg overflow-hidden z-20">
-              <div className="px-4 py-3 border-b border-gray-200 text-gray-700 text-sm font-semibold">
-                Notifications
-              </div>
-              <div className="max-h-96 overflow-y-auto">
-                {notifications.length > 0 ? (
-                  notifications.map(notification => (
-                    <div key={notification.id} className={`px-4 py-3 border-b border-gray-100 text-gray-700 text-sm ${!notification.read ? 'bg-blue-50' : ''}`}>
-                      {notification.message}
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-4 py-3 text-gray-500 text-sm">No new notifications</div>
-                )}
-              </div>
-              <div className="px-4 py-2 bg-gray-50 text-center">
-                <button className="text-blue-600 text-sm hover:underline">View all</button>
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* DESKTOP LOGOUT BUTTON */}
         <button
           onClick={handleLogout}
@@ -197,12 +131,9 @@ export default function AdminHeader({ isOpen, isExpanded, setIsOpen, onLogout, u
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg overflow-hidden z-20">
               <div className="px-4 py-3 border-b border-gray-200 text-gray-700 text-sm">
                 <div className="font-semibold">{user?.name || "Admin User"}</div>
-                <div className="text-gray-500">{user?.email || "admin@example.com"}</div>
-              </div>
+               </div>
 
-              <button className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm transition-colors">
-                Profile Settings
-              </button>
+             
 
               {/* MOBILE LOGOUT */}
               <button

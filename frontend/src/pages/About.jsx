@@ -1,4 +1,7 @@
-import React from "react";
+ import React, { useEffect, useState } from "react";
+ 
+ 
+ 
 import {
   FaHeart,
   FaHandsHelping,
@@ -16,11 +19,24 @@ import familyCard from "../assets/Home/EveryChild.webp"; // Importing local imag
 import evidenceCard from "../assets/Home/evidence.webp";
 
 export default function About() {
+  // ------------------ DYNAMIC MAP ADDRESS ------------------
+  const [mapAddress, setMapAddress] = useState("");
+
+useEffect(() => {
+  fetch(`${import.meta.env.VITE_BACKEND_URL}/api/map`)
+    .then((res) => res.json())
+    .then((data) => setMapAddress(data?.mapAddress || ""));
+}, []);
+
+
+  const finalAddress =
+    mapAddress || "849 Fairmount Ave, Suite 200-T8, Towson, MD 21286";
+  // ----------------------------------------------------------
+
   return (
     <div className="bg-white text-gray-800">
-      {/* Hero Section - Enhanced with animations */}
+      {/* -------- HERO SECTION -------- */}
       <section className="relative bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 py-20 px-6 overflow-hidden">
-        {/* Animated Background Decorations */}
         <div className="absolute top-20 right-10 w-[500px] h-[500px] bg-gradient-to-br from-orange-100/40 to-amber-100/40 rounded-full filter blur-3xl -z-10 animate-pulse-slow"></div>
         <div className="absolute bottom-20 left-10 w-[400px] h-[400px] bg-gradient-to-tr from-orange-50/50 to-amber-50/50 rounded-full filter blur-3xl -z-10 animate-pulse-slow animation-delay-2000"></div>
 
@@ -310,18 +326,17 @@ export default function About() {
       <section className="py-12 px-6 bg-white">
         <div className=" mx-auto">
           <div className="w-full h-120 rounded-2xl overflow-hidden shadow-lg">
-            <iframe
-              title="Autism ABA Partners Location"
-              src={`https://www.google.com/maps?q=${encodeURIComponent(
-                "849 Fairmount Ave, Suite 200-T8, Towson, MD 21286"
-              )}&z=13&output=embed`}
-              width="100%"
-              height="450"
-              style={{ border: 0 }}
-              allowFullScreen=""
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
+          <iframe
+  title="Autism ABA Partners Location"
+  src={`https://www.google.com/maps?q=${encodeURIComponent(finalAddress)}&z=13&output=embed`}
+  width="100%"
+  height="450"
+  style={{ border: 0 }}
+  allowFullScreen=""
+  loading="lazy"
+  referrerPolicy="no-referrer-when-downgrade"
+/>
+
           </div>
         </div>
       </section>

@@ -12,6 +12,8 @@ import contactRoutes from "./routes/contact.routes.js";
 import careerRoutes from "./routes/career.routes.js";
 import dashboard from "./routes/dashboard.routes.js";
 import settingsRoutes from "./routes/settings.routes.js";
+import maproutes from "./routes/map.routes.js"
+import heroroutes from "./routes/hero.routes.js"
  
 dotenv.config();
 
@@ -124,6 +126,8 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/career", careerRoutes);
 app.use("/api/dashboard", dashboard);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/map",maproutes);
+app.use("/api/hero",heroroutes);
  
 // simple health check
 app.get("/", (req, res) => {
