@@ -47,6 +47,7 @@ const allowedOrigins = [
   "http://localhost:3000",
    "https://autismabapartners.com",
    "https://autismabapartners.netlify.app",
+    "https://admin-autismaba.netlify.app",
   "adminabapartners.netlify.app",
   "autismabapartners.com",
   ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",").map((u) => u.trim()) : []),
